@@ -16,7 +16,6 @@ The final deployment successfully met and exceeded all strict clinical and opera
 
 *Note: A clinical decision threshold of `0.4` was utilized to ensure sensitivity remained safely above the required medical standard.*
 
----
 
 ## 1. Core Hardware Acceleration Strategies
 
@@ -27,8 +26,6 @@ Because the standardized target device (T4 GPU) possesses Tensor Cores, standard
 The ONNX export was configured with dynamic axes `(Min: 1, Opt: 32, Max: 64)`. This perfectly supports diverse clinical deployments:
 * If a single doctor uploads an X-Ray, it runs instantly at `batch=1` for sub-millisecond latency. 
 * If an overnight job processes thousands of scans, the system dynamically scales up to `batch=64` to maximize GPU throughput (yielding >35,000 samples/sec).
-
----
 
 ## 2. Cross-Platform Deployment Analysis
 
@@ -41,16 +38,15 @@ To support UdaciMed's diverse hardware fleet, the following platform-specific st
 
 ### B. Standard CPU Workstation (Hospital Deployments)
 * **Recommended Technology:** ONNX Runtime + OpenVINO Execution Provider.
-* **Justification:** Most hospital workstations lack dedicated GPUs. Converting the model to OpenVINO allows for maximum graph fusion and memory optimization specifically tailored for Intel hardware instructions (like AVX-512). It strikes the perfect balance—providing massive speedups on Intel hardware without forcing the abandonment of the universal ONNX model format.
+* **Justification:** Most hospital workstations lack dedicated GPUs. Converting the model to OpenVINO enables maximum graph fusion and memory optimization, specifically tailored to Intel hardware instructions (like AVX-512). It strikes the perfect balance—providing massive speedups on Intel hardware without forcing the abandonment of the universal ONNX model format.
 * **Configuration:** Utilized an `INT8` precision strategy (as CPUs lack FP16 tensor cores) with 4 CPU threads to balance latency without starving other critical background hospital applications.
 
 ### C. Mobile and Edge (Rural Clinics)
 * **Recommended Technology:** Core ML (iOS) and LiteRT (Android).
 * **Justification:** Deployments in rural clinics require lightweight runtimes, strict offline capability, and extended battery life. A bifurcated approach is recommended: Core ML to natively utilize the Apple Neural Engine for iPads, and LiteRT (formerly TFLite) for Android portable devices to minimize binary size and battery drain. Because rural edge devices have extreme constraints, these performance gains easily outweigh the development cost of maintaining two model formats.
 
----
 
 ## 3. Optimization Philosophy
 Optimization in medical AI is about finding the "sweet spot" among competing constraints, not just chasing the highest hardware metrics. 
 
-Pushing throughput too high degrades real-time latency, and compressing weights too aggressively compromises clinical safety. Once the strict SLAs are met securely (as demonstrated in the scorecard above), further engineering effort should be spent on robust infrastructure and user experience rather than squeezing out 1% more speed.
+Pushing throughput too high degrades real-time latency, and compressing weights too aggressively compromises clinical safety. Once strict SLAs are met securely (as demonstrated in the scorecard above), further engineering effort should focus on robust infrastructure and user experience rather than squeezing out 1% more speed.
